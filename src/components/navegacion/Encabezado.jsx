@@ -105,17 +105,17 @@ const Encabezado = () => {
                 <hr />
 
                 {/* Cerrar sesión (link) */}
-                {mostrarMenu && (
+                {mostrarMenu ? null : (
                     <Nav.Link
                         onClick={cerrarSesion}
-                        className="color-texto-marca"
+                        className={mostrarMenu ? "color-texto-marca" : "text-white"}
                     >
                         <i className="bi bi-box-arrow-right me-2"></i>
                         Cerrar sesión
                     </Nav.Link>
                 )}
 
-                <hr />
+             
 
                 {/* Info usuario */}
                 {mostrarMenu && (
