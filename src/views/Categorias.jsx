@@ -263,7 +263,7 @@ const Categorias = () => {
 
             {!cargando && categorias.length > 0 && (
                 <Row>
-                    <Col lg={12} className="d-none d-lg-block">
+                    <Col xs={12}>
                         <TablaCategorias
                             categorias={categorias}
                             abrirModalEdicion={abrirModalEdicion}
