@@ -262,8 +262,9 @@ const Categorias = () => {
                 </Row>
             )}
 
+            {/* TABLA SOLO EN PANTALLAS GRANDES */}
             {!cargando && categorias.length > 0 && (
-                <Row>
+                <Row className="d-none d-lg-flex">
                     <Col xs={12}>
                         <TablaCategorias
                             categorias={categorias}
@@ -274,23 +275,18 @@ const Categorias = () => {
                 </Row>
             )}
 
-            <Row>
-                <Col xs={12} sm={12}md={12} className="d-lg-none">
-                <TarjetaCategoria
-                    categorias={categorias}
-                  abrirModalEdicion={abrirModalEdicion}
-                  abrirModalEliminacion={abrirModalEliminacion}
-                />
-                </Col>
-
-                <Col xs={12} sm={12}md={12} className="d-none d-lg-block">
-                <TarjetaCategoria
-                    categorias={categorias}
-                  abrirModalEdicion={abrirModalEdicion}
-                  abrirModalEliminacion={abrirModalEliminacion}
-                />
-                </Col>
-            </Row>
+            {/* TARJETAS SOLO EN CELULAR Y TABLET */}
+            {!cargando && categorias.length > 0 && (
+                <Row className="d-lg-none">
+                    <Col xs={12}>
+                        <TarjetaCategoria
+                            categorias={categorias}
+                            abrirModalEdicion={abrirModalEdicion}
+                            abrirModalEliminacion={abrirModalEliminacion}
+                        />
+                    </Col>
+                </Row>
+            )}
 
             <ModalRegistroCategoria
                 mostrarModal={mostrarModal}
