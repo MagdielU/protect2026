@@ -235,7 +235,7 @@ const Categorias = () => {
     };
 
     return (
-        <>
+        <Container className="mt-3">
             <Row className="align-items-center mb-3">
                 <Col xs={9} sm={7} md={7} lg={7} className="d-flex align-items-center">
                     <h3 className="mb-0">
@@ -262,7 +262,6 @@ const Categorias = () => {
                 </Row>
             )}
 
-            {/* TABLA SOLO EN PANTALLAS GRANDES */}
             {!cargando && categorias.length > 0 && (
                 <Row className="d-none d-lg-flex">
                     <Col xs={12}>
@@ -275,7 +274,6 @@ const Categorias = () => {
                 </Row>
             )}
 
-            {/* TARJETAS SOLO EN CELULAR Y TABLET */}
             {!cargando && categorias.length > 0 && (
                 <Row className="d-lg-none">
                     <Col xs={12}>
@@ -317,7 +315,7 @@ const Categorias = () => {
                 eliminarCategoria={eliminarCategoria}
                 categoria={categoriaAEliminar}
             />
-        </>
+        </Container>
     );
 };
 
