@@ -6,6 +6,7 @@ import NotificacionOperacion from "../components/NotificacionOperacion";
 import TablaCategorias from "../components/categorias/TablaCategorias";
 import ModalEdicionCategoria from "../components/categorias/ModalEdicionCategoria";
 import ModalEliminacionCategoria from "../components/categorias/ModalEliminacionCategoria";
+import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 
 const Categorias = () => {
     const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
@@ -272,6 +273,24 @@ const Categorias = () => {
                     </Col>
                 </Row>
             )}
+
+            <Row>
+                <Col xs={12} sm={12}md={12} className="d-lg-none">
+                <TarjetaCategoria
+                    categorias={categorias}
+                  abrirModalEdicion={abrirModalEdicion}
+                  abrirModalEliminacion={abrirModalEliminacion}
+                />
+                </Col>
+
+                <Col xs={12} sm={12}md={12} className="d-none d-lg-block">
+                <TarjetaCategoria
+                    categorias={categorias}
+                  abrirModalEdicion={abrirModalEdicion}
+                  abrirModalEliminacion={abrirModalEliminacion}
+                />
+                </Col>
+            </Row>
 
             <ModalRegistroCategoria
                 mostrarModal={mostrarModal}
