@@ -8,9 +8,11 @@ import NotificacionOperacion from "../components/NotificacionOperacion";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
 import TablaProductos from "../components/productos/TablaProdutos";
+import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
+import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
+
 
 const Productos = () => {
-    // --- ESTADOS (Imagen edited-image.png) ---
     const [productos, setProductos] = useState([]);
     const [productosFiltrados, setProductosFiltrados] = useState([]);
     const [categorias, setCategorias] = useState([]);
@@ -274,6 +276,24 @@ const Productos = () => {
                 mensaje={toast.mensaje}
                 tipo={toast.tipo}
                 onCerrar={() => setToast({ ...toast, mostrar: false })}
+            />
+
+            <ModalEdicionProducto
+                mostrarModalEdicion={mostrarModalEdicion}
+                setMostrarModalEdicion={setMostrarModalEdicion}
+                productoEditar={productoEditar}
+                setProductoEditar={setProductoEditar}
+                categorias={categorias}
+                cargarProductos={cargarProductos}
+                setToast={setToast}
+            />
+
+            <ModalEliminacionProducto
+                mostrarModalEliminacion={mostrarModalEliminacion}
+                setMostrarModalEliminacion={setMostrarModalEliminacion}
+                productoAEliminar={productoAEliminar}
+                cargarProductos={cargarProductos}
+                setToast={setToast}
             />
         </Container>
     );
