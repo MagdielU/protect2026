@@ -93,6 +93,15 @@ const Encabezado = () => {
                     <strong>Productos</strong>
                 </Nav.Link>
 
+                {/* --- NUEVA SECCIÓN: Empleados --- */}
+                <Nav.Link
+                    onClick={() => manejarNavegacion("/empleados")}
+                    className={mostrarMenu ? "color-texto-marca" : "text-white"}
+                >
+                    {mostrarMenu && <i className="bi bi-person-badge-fill me-2"></i>}
+                    <strong>Empleados</strong>
+                </Nav.Link>
+
                 {/* Catálogo */}
                 <Nav.Link
                     onClick={() => manejarNavegacion("/catalogo")}
@@ -104,20 +113,18 @@ const Encabezado = () => {
 
                 <hr />
 
-                {/* Cerrar sesión (link) */}
-                {mostrarMenu ? null : (
+                {/* Cerrar sesión (link visible en barra superior) */}
+                {!mostrarMenu && (
                     <Nav.Link
                         onClick={cerrarSesion}
-                        className={mostrarMenu ? "color-texto-marca" : "text-white"}
+                        className="text-white"
                     >
                         <i className="bi bi-box-arrow-right me-2"></i>
                         Cerrar sesión
                     </Nav.Link>
                 )}
 
-             
-
-                {/* Info usuario */}
+                {/* Info usuario y botón cerrar sesión (visible en Menú Lateral/Mobile) */}
                 {mostrarMenu && (
                     <div className="mt-3 p-3 rounded bg-light text-dark">
                         <p className="mb-2">
