@@ -10,6 +10,8 @@ import TablaCategorias from "../components/categorias/TablaCategorias";
 import ModalEdicionCategoria from "../components/categorias/ModalEdicionCategoria";
 import ModalEliminacionCategoria from "../components/categorias/ModalEliminacionCategoria";
 import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // NUEVOS COMPONENTES
 // La ruta correcta hacia las carpetas reales
@@ -101,6 +103,45 @@ const Categorias = () => {
         setMostrarModalEliminacion(true);
     };
 
+  const generarPDFGeneral = () => {
+        if (categoriasFiltradas.length === 0) {
+            setToast({ mostrar: true, mensaje: "No hay datos para exportar.", tipo: "advertencia" });
+            return;
+        }
+
+        const doc = new jsPDF();
+
+        // Encabezado del Reporte General
+        doc.setFontSize(18);
+        doc.text("Reporte General de Categorías", 14, 20);
+        
+        doc.setFontSize(10);
+        doc.text(`Fecha de impresión: ${new Date().toLocaleDateString()}`, 14, 26);
+
+        // Línea decorativa
+        doc.line(14, 28, 195, 28);
+
+        // Estructura de las filas para la tabla global
+        const filasTabla = categoriasFiltradas.map(cat => [
+            cat.id_categoria,
+            cat.nombre_categoria,
+            cat.descripcion_categoria || "Sin descripción"
+        ]);
+
+        // Generar la tabla con todos los registros juntos
+        autoTable(doc, {
+            startY: 34,
+            head: [["ID", "Nombre de Categoría", "Descripción"]],
+            body: filasTabla,
+            theme: "striped", // Diseño limpio con filas alternadas
+            headStyles: { fillColor: [40, 167, 69] }, // Color verde Bootstrap (success) para el encabezado
+            margin: { top: 30 }
+        });
+
+        // Descargar el PDF único
+        doc.save("reporte_general_categorias.pdf");
+    };
+
     const agregarCategoria = async () => {
         if (!nuevaCategoria.nombre_categoria.trim() || !nuevaCategoria.descripcion_categoria.trim()) {
             setToast({ mostrar: true, mensaje: "Debe llenar todos los campos.", tipo: "advertencia" });
@@ -153,13 +194,25 @@ const Categorias = () => {
         }
     };
 
+
+
     return (
         <Container className="mt-3">
             <Row className="align-items-center mb-3">
-                <Col xs={9} sm={7}>
+                <Col xs={6} sm={7}>
                     <h3 className="mb-0"><i className="bi-bookmark-plus-fill me-2"></i> Categorías</h3>
                 </Col>
-                <Col xs={3} sm={5} className="text-end">
+                <Col xs={6} sm={5} className="text-end">
+                    {/* NUEVO BOTÓN GENERAL DE PDF */}
+                    <Button 
+                        variant="outline-danger" 
+                        onClick={generarPDFGeneral} 
+                        className="me-2"
+                    >
+                        <i className="bi bi-file-earmark-pdf-fill"></i>
+                        <span className="d-none d-sm-inline ms-2">Exportar Todo</span>
+                    </Button>
+
                     <Button onClick={() => setMostrarModal(true)}>
                         <i className="bi-plus-lg"></i>
                         <span className="d-none d-sm-inline ms-2">Nueva Categoría</span>
@@ -212,7 +265,7 @@ const Categorias = () => {
                                 />
                             </Col>
                             <Col xs={12} className="d-lg-none">
-                                <TarjetaCategoria
+                                <TablaCategorias
                                     categorias={categoriasPaginadas}
                                     abrirModalEdicion={abrirModalEdicion}
                                     abrirModalEliminacion={abrirModalEliminacion}

@@ -6,6 +6,7 @@ const TablaCategorias = ({
     categorias,
     abrirModalEdicion,
     abrirModalEliminacion
+    // Nota: Removimos generarPDFCategoria porque ya no se usará individualmente aquí
 }) => {
 
     const [loading, setLoading] = useState(true);
@@ -61,10 +62,11 @@ const TablaCategorias = ({
                                 </td>
                             </tr>
                         ))}
-                    </tbody >
-                </Table >
+                    </tbody>
+                </Table>
             )}
         </>
     );
 };
+
 export default TablaCategorias;

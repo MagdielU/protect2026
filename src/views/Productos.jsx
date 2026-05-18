@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Alert, Spinner } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfi";
 
+// Importaciones para PDF
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 // Importación de componentes
 import ModalRegistroProducto from "../components/productos/ModalRegistroProducto";
 import NotificacionOperacion from "../components/NotificacionOperacion";
@@ -10,7 +14,6 @@ import Paginacion from "../components/ordenamiento/Paginacion";
 import TablaProductos from "../components/productos/TablaProdutos";
 import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
 import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
-
 
 const Productos = () => {
     const [productos, setProductos] = useState([]);
@@ -44,11 +47,11 @@ const Productos = () => {
     const [productoAEliminar, setProductoAEliminar] = useState(null);
     const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
 
-    // --- ESTADOS DE PAGINACIÓN (Basado en lógica de img 7 y 8) ---
+    // Estados de Paginación
     const [paginaActual, setPaginaActual] = useState(1);
     const [registrosPorPagina, setRegistrosPorPagina] = useState(10);
 
-    // --- MANEJADORES (Imagen img 4.png) ---
+    // Manejadores de Inputs
     const manejoCambioInput = (e) => {
         const { name, value } = e.target;
         setNuevoProducto((prev) => ({ ...prev, [name]: value }));
@@ -67,7 +70,12 @@ const Productos = () => {
         setTextoBusqueda(e.target.value);
     };
 
-    // --- CARGA DE DATOS (Imagen img 5.png) ---
+    const obtenerNombreCategoria = (id) => {
+        const categoria = categorias.find(cat => cat.id_categoria === id);
+        return categoria ? categoria.nombre_categoria : "Sin categoría";
+    };
+
+    // Carga de Datos desde Supabase
     const cargarCategorias = async () => {
         try {
             const { data, error } = await supabase
@@ -99,7 +107,7 @@ const Productos = () => {
         }
     };
 
-    // --- LÓGICA DE AGREGAR (Imagen img 6.png) ---
+    // Función para Agregar Producto
     const agregarProducto = async () => {
         try {
             if (
@@ -161,7 +169,110 @@ const Productos = () => {
         }
     };
 
-    // --- EFECTOS (Imagen mig 5.png) ---
+    // Generar PDF
+   const generarPDFGeneral = async () => {
+        if (productosFiltrados.length === 0) {
+            setToast({ mostrar: true, mensaje: "No hay productos para exportar.", tipo: "advertencia" });
+            return;
+        }
+
+        // Mostrar un aviso temporal o cambiar estado si la descarga tarda un poco
+        setToast({ mostrar: true, mensaje: "Procesando imágenes y generando PDF...", tipo: "info" });
+
+        // Función auxiliar para convertir URL a Base64 de forma segura
+        const mapearImagenABase64 = (url) => {
+            return new Promise((resolve) => {
+                const img = new window.Image();
+                img.crossOrigin = "Anonymous"; // Evita bloqueos de CORS de Supabase Storage
+                img.src = url;
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL("image/jpeg"));
+                };
+                img.onerror = () => {
+                    // Si la imagen falla o no existe, retorna null
+                    resolve(null);
+                };
+            });
+        };
+
+        try {
+            // 1. Convertimos todas las imágenes en paralelo antes de armar el PDF
+            const imagenesBase64 = await Promise.all(
+                productosFiltrados.map(prod => prod.url_imagen ? mapearImagenABase64(prod.url_imagen) : Promise.resolve(null))
+            );
+
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text("Reporte General de Productos", 14, 20);
+            doc.setFontSize(10);
+            doc.text(`Fecha de impresión: ${new Date().toLocaleDateString()}`, 14, 26);
+            doc.line(14, 28, 195, 28);
+
+            // 2. Mapeamos las filas. Dejamos la primera columna vacía "" para que sirva de contenedor a la imagen
+            const filasTabla = productosFiltrados.map((prod, index) => [
+                "", // Columna 0: Espacio reservado para la Imagen
+                prod.id_producto,
+                prod.nombre_producto,
+                obtenerNombreCategoria(prod.categoria_producto),
+                `$${parseFloat(prod.precio_venta).toFixed(2)}`,
+                prod.descripcion_producto || "Sin descripción"
+            ]);
+
+            autoTable(doc, {
+                startY: 34,
+                head: [["Imagen", "ID", "Producto", "Categoría", "Precio", "Descripción"]],
+                body: filasTabla,
+                theme: "striped",
+                headStyles: { fillColor: [0, 123, 255], halign: 'center' },
+                styles: { valign: 'middle' },
+                columnStyles: {
+                    0: { cellWidth: 25, halign: 'center' }, // Ancho fijo para la columna de la imagen
+                    1: { cellWidth: 15 },
+                    4: { fontStyle: 'bold' }
+                },
+                rowPageBreak: 'avoid', // Evita que una fila se parta a la mitad entre páginas
+                didDrawCell: (data) => {
+                    // Verificamos si estamos en el cuerpo de la tabla y específicamente en la columna 0 (Imagen)
+                    if (data.section === 'body' && data.column.index === 0) {
+                        const rowIndex = data.row.index;
+                        const base64Img = imagenesBase64[rowIndex];
+
+                        if (base64Img) {
+                            // Calculamos coordenadas centrándolas un poco en la celda
+                            const x = data.cell.x + 3;
+                            const y = data.cell.y + 2;
+                            const width = 18;
+                            const height = 18;
+
+                            // Dibujamos la imagen dentro de la celda
+                            doc.addImage(base64Img, 'JPEG', x, y, width, height);
+                        }
+                    }
+                },
+                // Ajustamos el alto mínimo de la fila para que la imagen de 18x18px quepa perfectamente
+                didParseCell: (data) => {
+                    if (data.section === 'body') {
+                        data.row.height = 22; 
+                    }
+                },
+                margin: { top: 30 }
+            });
+
+            doc.save("reporte_general_productos.pdf");
+            setToast({ mostrar: true, mensaje: "PDF generado con éxito", tipo: "exito" });
+
+        } catch (error) {
+            console.error("Error al generar el PDF con imágenes:", error);
+            setToast({ mostrar: true, mensaje: "Error al procesar el PDF", tipo: "error" });
+        }
+    };
+
+    // Efectos de Búsqueda y Carga Inicial
     useEffect(() => {
         if (!textoBusqueda.trim()) {
             setProductosFiltrados(productos);
@@ -187,7 +298,7 @@ const Productos = () => {
         cargarProductos();
     }, []);
 
-    // --- LÓGICA DE PAGINACIÓN ---
+    // Lógica de paginación
     const productosPaginados = productosFiltrados.slice(
         (paginaActual - 1) * registrosPorPagina,
         paginaActual * registrosPorPagina
@@ -196,13 +307,23 @@ const Productos = () => {
     return (
         <Container className="mt-3">
             <Row className="align-items-center mb-3">
-                <Col className="d-flex align-items-center">
+                <Col xs={5} sm={6} md={7}>
                     <h3 className="mb-0">
                         <i className="bi-bag-heart-fill me-2"></i> Productos
                     </h3>
                 </Col>
 
-                <Col xs={3} sm={5} md={5} lg={5} className="text-end">
+                <Col xs={7} sm={6} md={5} className="text-end">
+                    <Button 
+                        variant="outline-danger" 
+                        onClick={generarPDFGeneral} 
+                        className="me-2"
+                        size="md"
+                    >
+                        <i className="bi bi-file-earmark-pdf-fill"></i>
+                        <span className="d-none d-sm-inline ms-2">Exportar Todo</span>
+                    </Button>
+
                     <Button onClick={() => setMostrarModal(true)} size="md">
                         <i className="bi-plus-lg"></i>
                         <span className="d-none d-sm-inline ms-2">Nuevo Producto</span>
@@ -231,7 +352,6 @@ const Productos = () => {
                 <>
                     <Row>
                         <Col>
-                            {/* Visualización de la tabla */}
                             {productosPaginados.length > 0 ? (
                                 <TablaProductos 
                                     productos={productosPaginados}
