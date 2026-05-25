@@ -7,6 +7,8 @@ import Empleados from "./views/Empleado";
 import Productos from "./views/Productos";
 import Login from "./views/Login";
 import RutaProtegida from "./components/rutas/RutaProtegida";
+import Clientes from "./views/Clientes";
+import Ventas from "./views/Ventas";
 import Pagina404 from "./views/Pagina404";
 import "./App.css";
 
@@ -22,6 +24,8 @@ const App = () => {
           <Route path="/catalogo" element={<Catalogo />} />
           <Route path="/empleados" element={<Empleados />} />
           <Route path="/productos" element={<RutaProtegida><Productos /></RutaProtegida>} />
+          <Route path="/clientes" element={<RutaProtegida><Clientes /></RutaProtegida>} />
+          <Route path="/ventas" element={<RutaProtegida><Ventas /></RutaProtegida>} />
           <Route path="*" element={<Pagina404 />} />
         </Routes>
       </main>

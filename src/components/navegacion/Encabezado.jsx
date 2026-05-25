@@ -113,6 +113,23 @@ const Encabezado = () => {
 
                 <hr />
 
+                <Nav.Link
+                    onClick={() => manejarNavegacion("/clientes")}
+                    className={mostrarMenu ? "color-texto-marca" : "text-white"}
+                >
+                    {mostrarMenu && <i className="bi bi-people-fill me-2"></i>}
+                    <strong>Clientes</strong>
+                </Nav.Link>
+
+                {/* Ventas */}
+                <Nav.Link
+                    onClick={() => manejarNavegacion("/ventas")}
+                    className={mostrarMenu ? "color-texto-marca" : "text-white"}
+                >
+                    {mostrarMenu && <i className="bi bi-cart-check-fill me-2"></i>}
+                    <strong>Ventas</strong>
+                </Nav.Link>
+
                 {/* Cerrar sesión (link visible en barra superior) */}
                 {!mostrarMenu && (
                     <Nav.Link
@@ -123,6 +140,8 @@ const Encabezado = () => {
                         Cerrar sesión
                     </Nav.Link>
                 )}
+
+
 
                 {/* Info usuario y botón cerrar sesión (visible en Menú Lateral/Mobile) */}
                 {mostrarMenu && (
