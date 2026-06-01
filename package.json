@@ -11,6 +11,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.99.2",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
