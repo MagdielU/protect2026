@@ -11,6 +11,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.99.2",
     "bootstrap": "^5.3.8",
