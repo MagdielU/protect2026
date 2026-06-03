@@ -78,6 +78,15 @@ const Encabezado = () => {
                     <strong>Inicio</strong>
                 </Nav.Link>
 
+                {/* Dashboard */}
+                <Nav.Link
+                    onClick={() => manejarNavegacion("/dashboard")}
+                    className={mostrarMenu ? "color-texto-marca" : "text-white"}
+                >
+                    {mostrarMenu && <i className="bi bi-speedometer2 me-2"></i>}
+                    <strong>Dashboard</strong>
+                </Nav.Link>
+
                 {/* Categorías */}
                 <Nav.Link
                     onClick={() => manejarNavegacion("/categorias")}
@@ -215,6 +224,8 @@ const Encabezado = () => {
                 <i className="bi bi-robot me-2"></i>
             </Nav.Link>
             <ChatIA mostrar={mostrarChatIA} onCerrar={() => setMostrarChatIA(false)} />
+
+
 
         </Navbar>
         
