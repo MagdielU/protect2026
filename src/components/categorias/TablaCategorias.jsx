@@ -5,7 +5,8 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 const TablaCategorias = ({
     categorias,
     abrirModalEdicion,
-    abrirModalEliminacion
+    abrirModalEliminacion,
+    copiarCategoria // ¡Agregado aquí para solucionar el ReferenceError!
     // Nota: Removimos generarPDFCategoria porque ya no se usará individualmente aquí
 }) => {
 
@@ -18,7 +19,7 @@ const TablaCategorias = ({
             setLoading(true);
         }
     }, [categorias]);
-    
+
     return (
         <>
             {loading ? (
@@ -50,6 +51,16 @@ const TablaCategorias = ({
                                         onClick={() => abrirModalEdicion(categoria)}
                                     >
                                         <i className="bi bi-pencil"></i>
+                                    </Button>
+
+                                    <Button
+                                        variant="outline-success"
+                                        size="sm"
+                                        className="m-1"
+                                        onClick={() => copiarCategoria(categoria)}
+                                        title="Copiar al portapapeles"
+                                    >
+                                        <i className="bi bi-clipboard"></i>
                                     </Button>
 
                                     <Button

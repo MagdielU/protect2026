@@ -14,6 +14,7 @@ import Paginacion from "../components/ordenamiento/Paginacion";
 import TablaProductos from "../components/productos/TablaProdutos";
 import ModalEliminacionProducto from "../components/productos/ModalEliminacionProducto";
 import ModalEdicionProducto from "../components/productos/ModalEdicionProducto";
+import ModalQRProducto from "../components/productos/ModalQRProducto";
 
 const Productos = () => {
     const [productos, setProductos] = useState([]);
@@ -43,6 +44,14 @@ const Productos = () => {
         url_imagen: "",
         archivo: null,
     });
+
+    const [productoQR, setProductoQR] = useState(null);
+    const [mostrarModalQR, setMostrarModalQR] = useState(false);
+
+    const generarQRImagen = (producto) => {
+        setProductoQR(producto);
+        setMostrarModalQR(true);
+    };
 
     const [productoAEliminar, setProductoAEliminar] = useState(null);
     const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
@@ -82,7 +91,7 @@ const Productos = () => {
                 .from("categorias")
                 .select("*")
                 .order("id_categoria", { ascending: true });
-            
+
             if (error) throw error;
             setCategorias(data || []);
         } catch (err) {
@@ -97,7 +106,7 @@ const Productos = () => {
                 .from("productos")
                 .select("*")
                 .order("id_producto", { ascending: false });
-            
+
             if (error) throw error;
             setProductos(data || []);
         } catch (err) {
@@ -137,7 +146,7 @@ const Productos = () => {
             const { data: urlData } = supabase.storage
                 .from("imagenes_productos")
                 .getPublicUrl(nombreArchivo);
-            
+
             const urlPublica = urlData.publicUrl;
 
             const { error } = await supabase.from("productos").insert([
@@ -170,7 +179,7 @@ const Productos = () => {
     };
 
     // Generar PDF
-   const generarPDFGeneral = async () => {
+    const generarPDFGeneral = async () => {
         if (productosFiltrados.length === 0) {
             setToast({ mostrar: true, mensaje: "No hay productos para exportar.", tipo: "advertencia" });
             return;
@@ -257,7 +266,7 @@ const Productos = () => {
                 // Ajustamos el alto mínimo de la fila para que la imagen de 18x18px quepa perfectamente
                 didParseCell: (data) => {
                     if (data.section === 'body') {
-                        data.row.height = 22; 
+                        data.row.height = 22;
                     }
                 },
                 margin: { top: 30 }
@@ -304,6 +313,34 @@ const Productos = () => {
         paginaActual * registrosPorPagina
     );
 
+    const copiarProducto = async (producto) => {
+        if (!producto) return;
+
+        const texto = `
+        ID: ${producto.id_producto}
+        Producto: ${producto.nombre_producto}
+        Precio: $${producto.precio || '0.00'}
+        Stock: ${producto.stock ?? 0}
+        Descripción: ${producto.descripcion_producto || 'Sin descripción'}`;
+
+        try {
+            await navigator.clipboard.writeText(texto);
+
+            setToast({
+                mostrar: true,
+                mensaje: `Producto "${producto.nombre_producto}" copiado al portapapeles`,
+                tipo: "exito",
+            });
+        } catch (err) {
+            console.error("Error al copiar:", err);
+            setToast({
+                mostrar: true,
+                mensaje: "No se pudo copiar al portapapeles",
+                tipo: "error",
+            });
+        }
+    };
+
     return (
         <Container className="mt-3">
             <Row className="align-items-center mb-3">
@@ -314,9 +351,9 @@ const Productos = () => {
                 </Col>
 
                 <Col xs={7} sm={6} md={5} className="text-end">
-                    <Button 
-                        variant="outline-danger" 
-                        onClick={generarPDFGeneral} 
+                    <Button
+                        variant="outline-danger"
+                        onClick={generarPDFGeneral}
                         className="me-2"
                         size="md"
                     >
@@ -353,13 +390,15 @@ const Productos = () => {
                     <Row>
                         <Col>
                             {productosPaginados.length > 0 ? (
-                                <TablaProductos 
+                                <TablaProductos
                                     productos={productosPaginados}
                                     categorias={categorias}
                                     setProductoEditar={setProductoEditar}
                                     setMostrarModalEdicion={setMostrarModalEdicion}
                                     setProductoAEliminar={setProductoAEliminar}
                                     setMostrarModalEliminacion={setMostrarModalEliminacion}
+                                    copiarProducto={copiarProducto}
+                                    generarQRImagen={generarQRImagen}
                                 />
                             ) : (
                                 <Alert variant="info" className="text-center">
@@ -376,9 +415,12 @@ const Productos = () => {
                             paginaActual={paginaActual}
                             establecerPaginaActual={setPaginaActual}
                             establecerRegistrosPorPagina={setRegistrosPorPagina}
+                            copiarProducto={copiarProducto}
+                            generarQRImagen={generarQRImagen}
                         />
                     )}
                 </>
+                
             )}
 
             <ModalRegistroProducto
@@ -414,6 +456,15 @@ const Productos = () => {
                 productoAEliminar={productoAEliminar}
                 cargarProductos={cargarProductos}
                 setToast={setToast}
+            />
+
+            <ModalQRProducto
+                mostrar={mostrarModalQR}
+                onHide={() => {
+                    setMostrarModalQR(false);
+                    setProductoQR(null);
+                }}
+                producto={productoQR}
             />
         </Container>
     );

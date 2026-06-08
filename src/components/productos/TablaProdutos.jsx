@@ -1,13 +1,15 @@
 import React from "react";
 import { Table, Button, Image, Badge, Card, Row, Col } from "react-bootstrap";
 
-const TablaProductos = ({ 
-    productos, 
-    categorias, 
-    setProductoEditar, 
-    setMostrarModalEdicion, 
-    setProductoAEliminar, 
-    setMostrarModalEliminacion 
+const TablaProductos = ({
+    productos,
+    categorias,
+    setProductoEditar,
+    setMostrarModalEdicion,
+    setProductoAEliminar,
+    setMostrarModalEliminacion,
+    copiarProducto,       // Corregido: Recibe la prop para copiar datos
+    generarQRImagen       // Corregido: Recibe el método para abrir el QR dinámico
 }) => {
 
     // Función para obtener el nombre de la categoría por su ID
@@ -36,8 +38,8 @@ const TablaProductos = ({
                             productos.map((producto) => (
                                 <tr key={producto.id_producto}>
                                     <td className="text-center" style={{ width: '100px' }}>
-                                        <Image 
-                                            src={producto.url_imagen} 
+                                        <Image
+                                            src={producto.url_imagen}
                                             alt={producto.nombre_producto}
                                             rounded
                                             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
@@ -61,23 +63,45 @@ const TablaProductos = ({
                                     </td>
                                     <td className="text-center">
                                         <div className="d-flex justify-content-center gap-2">
-                                            <Button 
-                                                variant="outline-warning" 
+                                            {/* Botón QR Dinámico (Escritorio) */}
+                                            <Button
+                                                variant="outline-dark"
+                                                size="sm"
+                                                onClick={() => generarQRImagen(producto)}
+                                                title="Generar código QR"
+                                            >
+                                                <i className="bi bi-qr-code"></i>
+                                            </Button>
+
+                                            <Button
+                                                variant="outline-warning"
                                                 size="sm"
                                                 onClick={() => {
                                                     setProductoEditar(producto);
                                                     setMostrarModalEdicion(true);
                                                 }}
+                                                title="Editar producto"
                                             >
                                                 <i className="bi bi-pencil"></i>
                                             </Button>
-                                            <Button 
-                                                variant="outline-danger" 
+
+                                            <Button
+                                                variant="outline-success"
+                                                size="sm"
+                                                onClick={() => copiarProducto(producto)}
+                                                title="Copiar producto al portapapeles"
+                                            >
+                                                <i className="bi bi-clipboard"></i>
+                                            </Button>
+
+                                            <Button
+                                                variant="outline-danger"
                                                 size="sm"
                                                 onClick={() => {
                                                     setProductoAEliminar(producto);
                                                     setMostrarModalEliminacion(true);
                                                 }}
+                                                title="Eliminar producto"
                                             >
                                                 <i className="bi bi-trash"></i>
                                             </Button>
@@ -105,8 +129,8 @@ const TablaProductos = ({
                                 <Card className="shadow-sm border-0 rounded-3">
                                     <Card.Body>
                                         <div className="d-flex align-items-center gap-3 mb-3">
-                                            <Image 
-                                                src={producto.url_imagen} 
+                                            <Image
+                                                src={producto.url_imagen}
                                                 alt={producto.nombre_producto}
                                                 rounded
                                                 style={{ width: '65px', height: '65px', objectFit: 'cover' }}
@@ -130,11 +154,21 @@ const TablaProductos = ({
                                             {producto.descripcion_producto || <span className="fst-italic">Sin descripción</span>}
                                         </p>
 
-                                        <div className="d-flex justify-content-end gap-2 border-top pt-2">
-                                            <Button 
-                                                variant="warning" 
+                                        <div className="d-flex justify-content-end gap-2 border-top pt-2 flex-wrap">
+                                            {/* Botón QR Dinámico (Móvil) */}
+                                            <Button
+                                                variant="outline-dark"
                                                 size="sm"
-                                                className="px-3"
+                                                className="px-2"
+                                                onClick={() => generarQRImagen(producto)}
+                                            >
+                                                <i className="bi bi-qr-code me-1"></i> QR
+                                            </Button>
+
+                                            <Button
+                                                variant="warning"
+                                                size="sm"
+                                                className="px-2"
                                                 onClick={() => {
                                                     setProductoEditar(producto);
                                                     setMostrarModalEdicion(true);
@@ -142,10 +176,20 @@ const TablaProductos = ({
                                             >
                                                 <i className="bi bi-pencil me-1"></i> Editar
                                             </Button>
-                                            <Button 
-                                                variant="danger" 
+
+                                            <Button
+                                                variant="outline-success"
                                                 size="sm"
-                                                className="px-3"
+                                                className="px-2"
+                                                onClick={() => copiarProducto(producto)}
+                                            >
+                                                <i className="bi bi-clipboard me-1"></i> Copiar
+                                            </Button>
+
+                                            <Button
+                                                variant="danger"
+                                                size="sm"
+                                                className="px-2"
                                                 onClick={() => {
                                                     setProductoAEliminar(producto);
                                                     setMostrarModalEliminacion(true);

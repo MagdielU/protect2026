@@ -15,7 +15,6 @@ import autoTable from "jspdf-autotable";
 import ModalEnvioCorreoCategorias from "../components/categorias/ModalEnvioCorreoCategorias";
 
 // NUEVOS COMPONENTES
-// La ruta correcta hacia las carpetas reales
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
 
@@ -55,7 +54,7 @@ const Categorias = () => {
         }
     }, [textoBusqueda, categorias]);
 
-    // --- LÓGICA DE PAGINACIÓN (Cálculo de segmento) ---
+    // --- LÓGICA DE PAGINACIÓN ---
     const categoriasPaginadas = categoriasFiltradas.slice(
         (paginaActual - 1) * registrosPorPagina,
         paginaActual * registrosPorPagina
@@ -74,8 +73,10 @@ const Categorias = () => {
         setEmailDestino("");
         setMostrarModalCorreo(true);
     };
+
     const formatearCategoriasParaCorreo = () => {
-        if (categorias.length === 0) return "No hay categorías registradas."; let texto = `LISTADO DE CATEGORÍAS\n\n`;
+        if (categorias.length === 0) return "No hay categorías registradas."; 
+        let texto = `LISTADO DE CATEGORÍAS\n\n`;
         texto += `Fecha: ${new Date().toLocaleDateString("es-NI")}\n`;
         texto += `Total de categorías: ${categorias.length}\n\n`;
         categorias.forEach((cat, index) => {
@@ -132,7 +133,6 @@ const Categorias = () => {
             });
     };
 
-    // FUNCIONES ORIGINALES (CARGA, AGREGAR, EDITAR, ELIMINAR)
     const cargarCategorias = async () => {
         try {
             setCargando(true);
@@ -183,34 +183,29 @@ const Categorias = () => {
 
         const doc = new jsPDF();
 
-        // Encabezado del Reporte General
         doc.setFontSize(18);
         doc.text("Reporte General de Categorías", 14, 20);
 
         doc.setFontSize(10);
         doc.text(`Fecha de impresión: ${new Date().toLocaleDateString()}`, 14, 26);
 
-        // Línea decorativa
         doc.line(14, 28, 195, 28);
 
-        // Estructura de las filas para la tabla global
         const filasTabla = categoriasFiltradas.map(cat => [
             cat.id_categoria,
             cat.nombre_categoria,
             cat.descripcion_categoria || "Sin descripción"
         ]);
 
-        // Generar la tabla con todos los registros juntos
         autoTable(doc, {
             startY: 34,
             head: [["ID", "Nombre de Categoría", "Descripción"]],
             body: filasTabla,
-            theme: "striped", // Diseño limpio con filas alternadas
-            headStyles: { fillColor: [40, 167, 69] }, // Color verde Bootstrap (success) para el encabezado
+            theme: "striped",
+            headStyles: { fillColor: [40, 167, 69] },
             margin: { top: 30 }
         });
 
-        // Descargar el PDF único
         doc.save("reporte_general_categorias.pdf");
     };
 
@@ -266,49 +261,52 @@ const Categorias = () => {
         }
     };
 
+    const copiarCategoria = async (categoria) => {
+        if (!categoria) return;
 
+        const texto = `ID: ${categoria.id_categoria}\nCategoría: ${categoria.nombre_categoria}\nDescripción: ${categoria.descripcion_categoria || 'Sin descripción'}`;
+
+        try {
+            await navigator.clipboard.writeText(texto);
+            setToast({
+                mostrar: true,
+                mensaje: `Categoría "${categoria.nombre_categoria}" copiada al portapapeles`,
+                tipo: "exito",
+            });
+        } catch (err) {
+            console.error("Error al copiar:", err);
+            setToast({
+                mostrar: true,
+                mensaje: "No se pudo copiar al portapapeles",
+                tipo: "error",
+            });
+        }
+    };
 
     return (
         <Container className="mt-3">
+            {/* CORREGIDO: Un solo bloque de encabezado limpio y alineado */}
             <Row className="align-items-center mb-3">
-                <Col xs={6} sm={7}>
-                    <h3 className="mb-0"><i className="bi-bookmark-plus-fill me-2"></i> Categorías</h3>
+                <Col xs={12} md={5} lg={6}>
+                    <h3 className="mb-0">
+                        <i className="bi bi-bookmark-plus-fill me-2"></i> Categorías
+                    </h3>
                 </Col>
-                <Col xs={6} sm={5} className="text-end">
-                    {/* NUEVO BOTÓN GENERAL DE PDF */}
-                    <Button
-                        variant="outline-danger"
-                        onClick={generarPDFGeneral}
-                        className="me-2"
-                    >
+                <Col xs={12} md={7} lg={6} className="text-md-end mt-2 mt-md-0 d-flex gap-2 justify-content-md-end justify-content-start">
+                    <Button variant="outline-danger" onClick={generarPDFGeneral}>
                         <i className="bi bi-file-earmark-pdf-fill"></i>
-                        <span className="d-none d-sm-inline ms-2">Exportar Todo</span>
+                        <span className="ms-2">Exportar Todo</span>
                     </Button>
 
-                    <Button onClick={() => setMostrarModal(true)}>
-                        <i className="bi-plus-lg"></i>
-                        <span className="d-none d-sm-inline ms-2">Nueva Categoría</span>
-                    </Button>
-                </Col>
-            </Row>
-
-            <Row className="align-items-center mb-3">
-                <Col xs={8} sm={8} md={8} lg={8} className="d-flex align-items-center"> <h3 className="mb-0">
-                    <i className="bi-bookmark-plus-fill me-2"></i> Categorías
-                </h3>
-                </Col>
-                <Col xs={2} sm={2} md={2} lg={2} className="text-end">
-                    <Button variant="primary" onClick={abrirModalCorreo} size="md">
+                    <Button variant="primary" onClick={abrirModalCorreo}>
                         <i className="bi bi-envelope"></i>
-                        <span className="d-none d-lg-inline ms-2">Enviar por Correo</span> </Button>
-                </Col>
-                <Col xs={2} sm={2} md={2} lg={2} className="text-end">
-                    <Button
-                        onClick={() => setMostrarModal(true)}
-                        size="md"
-                    >
-                        <i className="bi-plus-lg"></i>
-                        <span className="d-none d-lg-inline ms-2">Nueva Categoría</span> </Button>
+                        <span className="ms-2">Enviar por Correo</span>
+                    </Button>
+
+                    <Button variant="success" onClick={() => setMostrarModal(true)}>
+                        <i className="bi bi-plus-lg"></i>
+                        <span className="ms-2">Nueva Categoría</span>
+                    </Button>
                 </Col>
             </Row>
 
@@ -346,21 +344,15 @@ const Categorias = () => {
                         </Row>
                     )}
 
-                    {/* VISTA DE DATOS (TABLA Y TARJETAS) - USANDO categoriasPaginadas */}
+                    {/* VISTA DE DATOS (TABLA Y TARJETAS) */}
                     {categoriasFiltradas.length > 0 && (
                         <Row>
-                            <Col lg={12} className="d-none d-lg-block">
+                            <Col xs={12}>
                                 <TablaCategorias
                                     categorias={categoriasPaginadas}
                                     abrirModalEdicion={abrirModalEdicion}
                                     abrirModalEliminacion={abrirModalEliminacion}
-                                />
-                            </Col>
-                            <Col xs={12} className="d-lg-none">
-                                <TablaCategorias
-                                    categorias={categoriasPaginadas}
-                                    abrirModalEdicion={abrirModalEdicion}
-                                    abrirModalEliminacion={abrirModalEliminacion}
+                                    copiarCategoria={copiarCategoria}
                                 />
                             </Col>
                         </Row>
